@@ -15,15 +15,15 @@ class User(db.Model):
         return f'<User {self.first_name} {self.last_name}>'
     
     @classmethod
-    def create_user(cls,session,first_name,last_name,email):
+    def create_user(cls,first_name,last_name,email):
         new_user = cls(first_name=first_name,last_name=last_name,email=email)
-        session.add(new_user)
-        session.commit()
-        session.remove()
+        db.session.add(new_user)
+        db.session.commit()
         return new_user
 
     def to_json(self):
         return {'email': self.email,'first_name': self.first_name,'last_name': self.last_name}
+
 
 
 
