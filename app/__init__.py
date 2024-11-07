@@ -1,5 +1,5 @@
 from flask import  Flask
-# from sqlalchemy.orm import sessionmaker, scoped_session
+from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
 from config import Config
 from .database import db
@@ -12,6 +12,8 @@ def create_app():
 
     with app.app_context():
         db.init_app(app)
+
+        JWTManager(app)   
 
         migrate.init_app(app, db)  
 

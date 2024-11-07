@@ -5,6 +5,7 @@ from uuid import uuid4,UUID
 class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.UUID,primary_key=True,default=uuid4)
+    username= db.Column(db.String(255),nullable=False,unique=True)
     first_name = db.Column(db.String(80),nullable=False)
     last_name = db.Column(db.String(80),nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
@@ -17,11 +18,15 @@ class User(db.Model):
         return f'<User {self.first_name} {self.last_name}>'
     
     @classmethod
-    def create_user(cls,first_name,last_name,email):
-        new_user = cls(first_name=first_name,last_name=last_name,email=email)
+    def create_user(cls,username,first_name,last_name,email,password):
+        new_user = cls(username=username,first_name=first_name,last_name=last_name,email=email)
         db.session.add(new_user)
-        db.session.commit()
-        return new_user
+        password = cls.password.store_password(password,new_user.id)
+        if password:
+            db.session.commit()
+            return new_user
+        db.session.rollback()
+        return None
     
     @classmethod
     def get_by_email(cls,email):
@@ -60,10 +65,20 @@ class User(db.Model):
 
 class Password(db.Model):
     __tablename__ = 'password'
-    user_id = db.Column(db.UUID,db.ForeignKey('users.id',nullable=False))
-    Password = db.Column(db.String(255), nullable=False)
+    user_id = db.Column(db.UUID,db.ForeignKey('users.id'),nullable=False,primary_key=True)
+    password = db.Column(db.String(255), nullable=False)
 
     user=db.Relationship('User',back_populates='password',lazy=True,uselist=False)
+
+    @classmethod
+    def store_password(cls,password,user_id):
+        try:
+            password = Password(password=password,user_id=user_id)
+            db.session.add(password)
+            # db.session.commit()
+            return True
+        except Exception:
+            return None
 
 
 # Notes class
