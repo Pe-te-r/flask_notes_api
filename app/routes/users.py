@@ -1,12 +1,12 @@
 from flask import   Blueprint,jsonify
-from app.database.Users import User
+from app.database.Model import User
 
 users_bp = Blueprint('users_bp',__name__)
 
 
-@users_bp.route('/users',methods=['GET'])
-def get_users():
-    user = User.get_by_email('shakirah@gmail.com')
+@users_bp.route('/users/<user_id>',methods=['GET'])
+def get_users(user_id):
+    user = User.get_by_id(user_id)
 
     if user:
         return jsonify(user.to_json())
@@ -20,8 +20,28 @@ def create_users():
     return jsonify({"message": "User not found"}), 404
     
 
-@users_bp.route('/users/<uuid:user_id>',methods=['DELETE'])
+@users_bp.route('/users/<user_id>',methods=['DELETE'])
 def delete_user(user_id):
-    user = User.delete_user(user_id)
-    if user:
-        return jsonify({'message': "User deleted"})
+    try:
+        print('hello')
+        print(user_id)
+        user = User.delete_user(user_id)
+        
+        if user:
+            return jsonify({'message': "User deleted"}),200
+        
+        return jsonify({'message':'user not found'}),404
+    except Exception as e:
+        print(f'there is an error :{e}')
+
+        return jsonify({'error':'error deleting user'})
+
+@users_bp.route('/users',methods=['GET'])
+def getAll_users():
+    try:
+        users = User.get_all_users()
+        if users:
+            return jsonify([user.to_json() for user in users]),200
+        return jsonify({'message':'no users found'}),404
+    except Exception as e:
+        print(f'there is an error :{e}')
