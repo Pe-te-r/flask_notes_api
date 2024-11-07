@@ -1,5 +1,6 @@
-from app.database import db
+import bcrypt
 from uuid import uuid4,UUID
+from app.database import db
 
 # user class
 class User(db.Model):
@@ -11,7 +12,7 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
 
     notes = db.relationship('Notes',back_populates='user',uselist=True,lazy=True)
-    password = db.relationship('password',back_populates='user',uselist=False,lazy=True)
+    password = db.relationship('Password',back_populates='user',uselist=False,lazy=True)
 
     
     def __repr__(self):
@@ -21,8 +22,10 @@ class User(db.Model):
     def create_user(cls,username,first_name,last_name,email,password):
         new_user = cls(username=username,first_name=first_name,last_name=last_name,email=email)
         db.session.add(new_user)
-        password = cls.password.store_password(password,new_user.id)
-        if password:
+        db.session.commit()
+        hashed_password = Password.hash_password(password)
+        password_stored = Password.store_password(hashed_password,new_user.id)
+        if password_stored:
             db.session.commit()
             return new_user
         db.session.rollback()
@@ -63,6 +66,7 @@ class User(db.Model):
     def get_all_users(cls):
         return cls.query.all()
 
+# password
 class Password(db.Model):
     __tablename__ = 'password'
     user_id = db.Column(db.UUID,db.ForeignKey('users.id'),nullable=False,primary_key=True)
@@ -75,10 +79,18 @@ class Password(db.Model):
         try:
             password = Password(password=password,user_id=user_id)
             db.session.add(password)
-            # db.session.commit()
             return True
         except Exception:
             return None
+
+    @staticmethod
+    def hash_password(password):
+        salt = bcrypt.gensalt() 
+        hashed_password = bcrypt.hashpw(password.encode(), salt)
+        return hashed_password
+    @staticmethod
+    def verify_password(provided_password,stored_password):
+         return bcrypt.checkpw(provided_password.encode(), stored_password)
 
 
 # Notes class
