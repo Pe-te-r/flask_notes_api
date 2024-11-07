@@ -1,6 +1,7 @@
 from app.database import db
 from uuid import uuid4,UUID
 
+# user class
 class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.UUID,primary_key=True,default=uuid4)
@@ -9,6 +10,7 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
 
     notes = db.relationship('Notes',back_populates='user',uselist=True,lazy=True)
+    password = db.relationship('password',back_populates='user',uselist=False,lazy=True)
 
     
     def __repr__(self):
@@ -56,8 +58,15 @@ class User(db.Model):
     def get_all_users(cls):
         return cls.query.all()
 
+class Password(db.Model):
+    __tablename__ = 'password'
+    user_id = db.Column(db.UUID,db.ForeignKey('users.id',nullable=False))
+    Password = db.Column(db.String(255), nullable=False)
+
+    user=db.Relationship('User',back_populates='password',lazy=True,uselist=False)
 
 
+# Notes class
 class Notes(db.Model):
     id = db.Column(db.UUID,primary_key=True,default=uuid4)
     user_id = db.Column(db.UUID, db.ForeignKey('users.id'), nullable=False)
@@ -90,3 +99,21 @@ class Notes(db.Model):
     @classmethod
     def get_all_notes(cls):
         return cls.query.all()
+
+    @classmethod
+    def get_by_id(cls, id):
+        if isinstance(id, str):
+            try:
+                id = UUID(id)
+                return cls.query.filter(cls.id == id).first()
+            except ValueError:
+                return None
+        return None
+    @classmethod
+    def delete_note(cls,note_id):
+        note = cls.get_by_id(str(note_id))
+        if note:
+            db.session.delete(note)
+            db.session.commit()
+            return True
+        return False
