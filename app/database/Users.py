@@ -20,10 +20,30 @@ class User(db.Model):
         db.session.add(new_user)
         db.session.commit()
         return new_user
+    
+    @classmethod
+    def get_by_email(cls,email):
+        user = cls.query.filter(cls.email==email).first()
+        return user
+    
 
     def to_json(self):
         return {'email': self.email,'first_name': self.first_name,'last_name': self.last_name}
 
+    @classmethod
+    def get_by_id(cls,id):
+        user = cls.query.filter(cls.id==id).first()
+        return user
+
+    @classmethod
+    def delete_user(cls,user_id):
+        user = cls.get_by_id(id)
+        if user:
+            db.session.delete(user)
+            db.session.commit()
+            return True
+        return False
+        
 
 
 
