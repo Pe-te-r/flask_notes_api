@@ -28,9 +28,13 @@ def create_users():
         if missing_fields:
             return jsonify({'error': f'Missing fields: {", ".join(missing_fields)}'}), 400
         
+        if  User.get_by_email(data['email']):
+            return jsonify({'error':'email already exist'})
+        
 
 
         user = User.create_user(data['username'],data['first_name'],data['last_name'],data['email'],data['password'])
+        print(user)
         if user:
             return jsonify({"id": user.id, "name": user.first_name, "email": user.email}), 200
         return jsonify({"message": "User not found"}), 404
@@ -85,7 +89,7 @@ def login_user():
         return jsonify({'error':'this user does not exist'})
 
     if Password.verify_password(data['password'],user.password.password):
-        access_token = create_access_token(identity=data['data'])
+        access_token = create_access_token(identity=data['email'])
 
         return jsonify({'message':access_token}),200
     

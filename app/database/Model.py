@@ -116,9 +116,6 @@ class Notes(db.Model):
         db.session.add(note)
         db.session.commit()
         return note
-
-    def owner_email(self):
-        return self.user.email
     
     def to_json(self):
         return {
