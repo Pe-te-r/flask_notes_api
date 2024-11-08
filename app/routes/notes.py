@@ -1,4 +1,5 @@
 from flask import jsonify, Blueprint
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.database.Model import Notes
 
 
@@ -12,7 +13,9 @@ def get_notes():
     return jsonify({'error': 'no notes found'})
 
 @notes_bp.route('/notes/<note_id>',methods=['GET'])
+@jwt_required()
 def get_one_note(note_id):
+    email = get_jwt_identity()
     note= Notes.get_by_id(note_id)
     if note:
         return jsonify(note.to_json())
