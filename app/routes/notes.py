@@ -1,4 +1,4 @@
-from flask import jsonify, Blueprint
+from flask import jsonify, Blueprint,request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.database.Model import Notes,User
 
@@ -29,11 +29,12 @@ def get_one_note(note_id):
 @jwt_required()
 def create_notes():
     try:
+        data = request.get_json()
         email = get_jwt_identity()
         user = User.get_by_email(email)
         if not user:
             return jsonify({'error':'user not found'})
-        note = Notes.create_note(user.id,'this is my first note here')
+        note = Notes.create_note(user.id,data['note'])
         print(note)
         if note:
             return jsonify({'notes': note.to_json()})

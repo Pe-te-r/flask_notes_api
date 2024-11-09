@@ -1,5 +1,5 @@
 from flask import request,   Blueprint,jsonify
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import get_jwt_identity, jwt_required, create_access_token
 from app.database.Model import User,Password
 
 
@@ -95,3 +95,14 @@ def login_user():
     
     return jsonify({'error':'details not correct'})
 
+
+@users_bp.route('/users/notes/<user_id>',methods=['GET'])
+@jwt_required()
+def get_user_notes(user_id):
+    email = get_jwt_identity()
+    user = User.get_by_email(email)
+    if not user:
+        return jsonify({'error': 'User not found'})
+    print(user.user_notes())
+    return jsonify({'notes':user.user_notes()})
+    

@@ -12,7 +12,7 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
 
     notes = db.relationship('Notes',back_populates='user',uselist=True,lazy=True)
-    password = db.relationship('Password',back_populates='user',uselist=False,lazy=True)
+    password = db.relationship('Password',back_populates='user',uselist=True,lazy=True)
 
     
     def __repr__(self):
@@ -35,6 +35,9 @@ class User(db.Model):
     def get_by_email(cls,email):
         user = cls.query.filter(cls.email==email).first()
         return user
+    
+    def user_notes(self):
+        return [note.to_json() for note in self.notes] if self.notes else []
     
 
     def get_notes(self):
@@ -99,7 +102,7 @@ class Notes(db.Model):
     user_id = db.Column(db.UUID, db.ForeignKey('users.id'), nullable=False)
     note = db.Column(db.Text,nullable=False)
 
-    user = db.Relationship('User',back_populates='notes',lazy=True)
+    user = db.Relationship('User',back_populates='notes',uselist=False,lazy=True)
 
     def __repr__(self):
         return f'<User {self.id} {self.note}>'
