@@ -25,14 +25,19 @@ def get_one_note(note_id):
         return jsonify(note.to_json())
     return jsonify({'error': 'no note found'})
 
-@notes_bp.route('/notes/<user_id>',methods=['POST'])
-def create_notes(user_id):
+@notes_bp.route('/notes',methods=['POST'])
+@jwt_required()
+def create_notes():
     try:
-        print(user_id)
-        note = Notes.create_note(user_id,'this is my first note here')
+        email = get_jwt_identity()
+        user = User.get_by_email(email)
+        if not user:
+            return jsonify({'error':'user not found'})
+        note = Notes.create_note(user.id,'this is my first note here')
+        print(note)
         if note:
-            print('here now')
             return jsonify({'notes': note.to_json()})
+        return jsonify({'error': 'error creating notes'})
 
     except Exception:
         return jsonify({'notes': 'error creating notes'})

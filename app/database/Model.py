@@ -108,14 +108,16 @@ class Notes(db.Model):
     @classmethod
     def create_note(cls, user_id, note):
         try:
-            user_id = UUID(user_id) 
+            # user_id = UUID(user_id) 
             note = cls(user_id = user_id, note = note)
-        except Exception:
+            print(note)
+            db.session.add(note)
+            db.session.commit()
+            return note
+            
+        except Exception as e:
+            print(e)
             return False
-        print(note)
-        db.session.add(note)
-        db.session.commit()
-        return note
     
     def to_json(self):
         return {
