@@ -125,7 +125,7 @@ class Notes(db.Model):
     def to_json(self):
         return {
             'id': self.id,
-            'user_name': f'{self.user.first_name} {self.user.last_name}' if self.user else None,
+            # 'user_name': f'{self.user.first_name} {self.user.last_name}' if self.user else None,
             'content': self.note,
         }
     @classmethod
