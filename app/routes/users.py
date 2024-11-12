@@ -96,7 +96,7 @@ def login_user():
 
         return jsonify({'message':access_token}),200
     
-    return jsonify({'error':'details not correct'})
+    return jsonify({'error':'password not correct'})
 
 
 @users_bp.route('/users/notes/<user_id>',methods=['GET'])
@@ -109,3 +109,4 @@ def get_user_notes(user_id):
     print(user.user_notes())
     return jsonify({'notes':user.user_notes()})
     
+
