@@ -31,6 +31,7 @@ def create_users():
         if  User.get_by_email(data['email']):
             return jsonify({'error':'email already exist'})
         
+        print('here now')
 
 
         user = User.create_user(data['username'],data['first_name'],data['last_name'],data['email'],data['password'])
@@ -77,6 +78,7 @@ def login_user():
         return jsonify({'error':'no data provided'}), 400
     
     required_fields = ['email','password']
+    print(data)
 
     missing_fields = [field for field in required_fields if field not in data]
 
@@ -87,6 +89,7 @@ def login_user():
     print(user)
     if not user:
         return jsonify({'error':'this user does not exist'})
+
 
     if Password.verify_password(data['password'],user.password.password):
         access_token = create_access_token(identity=data['email'])

@@ -12,7 +12,7 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
 
     notes = db.relationship('Notes',back_populates='user',uselist=True,lazy=True)
-    password = db.relationship('Password',back_populates='user',uselist=True,lazy=True)
+    password = db.relationship('Password',back_populates='user',uselist=False,lazy=True)
 
     
     def __repr__(self):
@@ -20,16 +20,23 @@ class User(db.Model):
     
     @classmethod
     def create_user(cls,username,first_name,last_name,email,password):
-        new_user = cls(username=username,first_name=first_name,last_name=last_name,email=email)
-        db.session.add(new_user)
-        db.session.commit()
-        hashed_password = Password.hash_password(password)
-        password_stored = Password.store_password(hashed_password,new_user.id)
-        if password_stored:
+        try:
+            new_user = cls(username=username,first_name=first_name,last_name=last_name,email=email)
+            db.session.add(new_user)
             db.session.commit()
-            return new_user
-        db.session.rollback()
-        return None
+            hashed_password = Password.hash_password(password)
+            password_stored = Password.store_password(hashed_password,new_user.id)
+            if password_stored:
+                db.session.commit() 
+                return new_user
+            db.session.rollback()
+            return None
+            # comment: 
+        except Exception as e:
+            print(e)
+            print('up here')
+            return None
+        # end try
     
     @classmethod
     def get_by_email(cls,email):
